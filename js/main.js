@@ -52,7 +52,7 @@ var GUESTS_MAX = 8;
 
 var getFewItems = function (array) {
   var newArray = [];
-  var itemsQuantity = getRandomNumber(0, array.length);
+  var itemsQuantity = getRandomNumber(1, array.length);
 
   for (var i = 0; i < itemsQuantity; i++) {
     newArray.push(array[i]);
@@ -127,13 +127,87 @@ var createPin = function (advertisement) {
 var pinsWrapper = document.querySelector('.map__pins');
 
 var renderPins = function (advertisements) {
-  var fragment = document.createDocumentFragment();
+  var pinsFragment = document.createDocumentFragment();
 
   for (var i = 0; i < advertisements.length; i++) {
-    fragment.appendChild(createPin(advertisements[i]));
+    pinsFragment.appendChild(createPin(advertisements[i]));
   }
 
-  pinsWrapper.appendChild(fragment);
+  pinsWrapper.appendChild(pinsFragment);
 };
 
 renderPins(createAdvertisements(AD_QUANTITY));
+
+//  module3-task3
+//  1. На основе первого по порядку элемента из сгенерированного массива и шаблона #card создайте DOM-элемент объявления.
+var cardTemplate = document.querySelector('#card')
+                            .content
+                            .querySelector('.map__card');
+
+//  temp
+var translateType = function (type) {
+  switch (type) {
+    case 'flat':
+      return 'Квартира';
+    case 'bungalo':
+      return 'Бунгало';
+    case 'house':
+      return 'Дом';
+    case 'palace':
+      return 'Дворец';
+    default:
+      return 'Сарай';
+  }
+};
+//  temp
+
+var fillFeaturesList = function (features) {
+  var featuresFragment = document.createDocumentFragment();
+
+  features.forEach(function (item) {
+    var featureItem = document.createElement('li');
+    featureItem.className = 'popup__feature popup__feature--' + item;
+    featureItem.textContent = item;
+    featuresFragment.appendChild(featureItem);
+  });
+
+  return featuresFragment;
+};
+
+var fillPhotosList = function (photos) {
+  var photosFragment = document.createDocumentFragment();
+
+  photos.forEach(function (item) {
+    var photoItem = document.createElement('img');
+    photoItem.className = 'popup__photo';
+    photoItem.src = item;
+    photoItem.width = 45;
+    photoItem.height = 40;
+    photoItem.alt = 'Фотография жилья';
+    photosFragment.appendChild(photoItem);
+  });
+
+  return photosFragment;
+};
+
+var createAdvertisementCard = function (data) {
+  var cardElement = cardTemplate.cloneNode(true);
+  var offer = data.offer;
+
+  cardElement.querySelector('.popup__title').textContent = offer.title;
+  cardElement.querySelector('.popup__text--address').textContent = offer.address;
+  cardElement.querySelector('.popup__text--price').textContent = offer.price + '₽/ночь';
+  cardElement.querySelector('.popup__type').textContent = translateType(offer.type);
+  cardElement.querySelector('.popup__text--capacity').textContent = offer.rooms + ' комнаты для ' + offer.guests + ' гостей';
+  cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + offer.checkin + ' , выезд до ' + offer.checkout;
+  cardElement.querySelector('.popup__features').innerHTML = '';
+  cardElement.querySelector('.popup__features').append(fillFeaturesList(offer.features));
+  cardElement.querySelector('.popup__description').textContent = offer.description;
+  cardElement.querySelector('.popup__photos').innerHTML = '';
+  cardElement.querySelector('.popup__photos').append(fillPhotosList(offer.photos));
+
+  return cardElement;
+};
+
+//  2. Вставьте полученный DOM-элемент в блок .map перед блоком .map__filters-container.
+document.querySelector('.map__filters-container').before(createAdvertisementCard(createAdvertisements(AD_QUANTITY)[0]));
